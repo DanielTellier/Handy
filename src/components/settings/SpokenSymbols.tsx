@@ -146,7 +146,7 @@ export const SpokenSymbols: React.FC = () => {
                   onClick={handleAddRow}
                   variant="primary"
                   size="sm"
-                  disabled={!newSpoken.trim() || !newSymbol.trim() || isSaving}
+                  disabled={!newSpoken.trim() || newSymbol.length === 0 || isSaving}
                 >
                   {t("settings.postProcessing.symbols.table.add")}
                 </Button>
