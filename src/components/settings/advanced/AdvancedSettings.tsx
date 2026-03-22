@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import { ShowOverlay } from "../ShowOverlay";
 import { ModelUnloadTimeoutSetting } from "../ModelUnloadTimeout";
 import { CustomWords } from "../CustomWords";
+import { SpokenSymbols } from "../SpokenSymbols";
 import { SettingsGroup } from "../../ui/SettingsGroup";
+import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { StartHidden } from "../StartHidden";
 import { AutostartToggle } from "../AutostartToggle";
 import { ShowTrayIcon } from "../ShowTrayIcon";
@@ -23,7 +25,7 @@ import { LazyStreamClose } from "../LazyStreamClose";
 
 export const AdvancedSettings: React.FC = () => {
   const { t } = useTranslation();
-  const { getSetting } = useSettings();
+  const { getSetting, updateSetting, isUpdating } = useSettings();
   const experimentalEnabled = getSetting("experimental_enabled") || false;
 
   return (
@@ -47,6 +49,28 @@ export const AdvancedSettings: React.FC = () => {
       <SettingsGroup title={t("settings.advanced.groups.transcription")}>
         <CustomWords descriptionMode="tooltip" grouped />
         <AppendTrailingSpace descriptionMode="tooltip" grouped={true} />
+        <ToggleSwitch
+          checked={getSetting("strip_trailing_period") ?? false}
+          onChange={(val) => updateSetting("strip_trailing_period", val)}
+          isUpdating={isUpdating("strip_trailing_period")}
+          label={t("settings.advanced.stripTrailingPeriod.label")}
+          description={t("settings.advanced.stripTrailingPeriod.description")}
+          descriptionMode="tooltip"
+          grouped={true}
+        />
+        <ToggleSwitch
+          checked={getSetting("no_auto_capitalize") ?? false}
+          onChange={(val) => updateSetting("no_auto_capitalize", val)}
+          isUpdating={isUpdating("no_auto_capitalize")}
+          label={t("settings.advanced.noAutoCapitalize.label")}
+          description={t("settings.advanced.noAutoCapitalize.description")}
+          descriptionMode="tooltip"
+          grouped={true}
+        />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.postProcessing.symbols.title")}>
+        <SpokenSymbols />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.advanced.groups.history")}>

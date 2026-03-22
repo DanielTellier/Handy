@@ -151,6 +151,14 @@ const settingUpdaters: {
     commands.changeOrtAcceleratorSetting(value as OrtAcceleratorSetting),
   extra_recording_buffer_ms: (value) =>
     commands.changeExtraRecordingBufferSetting(value as number),
+  spoken_symbols: (value) =>
+    commands.updateSpokenSymbols(value as import("@/bindings").SpokenSymbolMapping[]),
+  spoken_symbols_enabled: (value) =>
+    commands.changeSpokenSymbolsEnabledSetting(value as boolean),
+  strip_trailing_period: (value) =>
+    commands.changeStripTrailingPeriodSetting(value as boolean),
+  no_auto_capitalize: (value) =>
+    commands.changeNoAutoCapitalizeSetting(value as boolean),
 };
 
 export const useSettingsStore = create<SettingsStore>()(

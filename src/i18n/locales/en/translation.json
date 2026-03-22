@@ -170,6 +170,10 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "transcribe_with_symbols": {
+            "name": "Symbol Replacement Hotkey",
+            "description": "Optional: A dedicated hotkey that always applies spoken symbol replacement to your transcription."
           }
         },
         "errors": {
@@ -338,6 +342,14 @@
           "sec15": "After 15 seconds (Debug)"
         }
       },
+      "stripTrailingPeriod": {
+        "label": "Strip Trailing Period",
+        "description": "Remove the period that transcription models automatically add at the end of each result."
+      },
+      "noAutoCapitalize": {
+        "label": "Disable Auto-Capitalization",
+        "description": "Prevent the transcription model from capitalizing the first word of each result."
+      },
       "customWords": {
         "title": "Custom Words",
         "description": "Add words that are often misheard or misspelled during transcription. The system will automatically correct similar-sounding words to match your list.",
@@ -405,6 +417,24 @@
         "cancel": "Cancel",
         "selectToEdit": "Select a prompt above to view and edit its details.",
         "createFirst": "Click 'Create New Prompt' above to create your first post-processing prompt."
+      },
+      "symbols": {
+        "title": "Spoken Symbols",
+        "description": "Replace spoken words or phrases with their corresponding special characters (e.g. 'open brace' → '{').",
+        "hotkey": {
+          "title": "Symbol Replacement Hotkey"
+        },
+        "enabledLabel": "Always Apply Symbol Replacement",
+        "enabledDescription": "Automatically replace spoken symbol words with their characters on every transcription.",
+        "table": {
+          "spokenPhrase": "Spoken Phrase",
+          "symbol": "Symbol",
+          "spokenPlaceholder": "e.g. open brace",
+          "symbolPlaceholder": "e.g. {",
+          "add": "Add",
+          "empty": "No symbol mappings. Add one below.",
+          "delete": "Remove"
+        }
       }
     },
     "history": {

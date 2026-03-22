@@ -168,33 +168,52 @@ fn build_apple_intelligence_bridge() {
     .trim()
     .to_string();
 
-    let toolchain_swift_lib = Path::new(&swiftc_path)
+    let toolchain_root = Path::new(&swiftc_path)
         .parent()
         .and_then(|p| p.parent())
-        .map(|root| root.join("lib/swift/macosx"))
-        .expect("Unable to determine Swift toolchain lib directory");
+        .expect("Unable to determine Swift toolchain root");
+    let toolchain_swift_lib = toolchain_root.join("lib/swift/macosx");
+    let toolchain_plugin_dir = toolchain_root.join("lib/swift/host/plugins");
     let sdk_swift_lib = Path::new(&sdk_path).join("usr/lib/swift");
 
     // Use macOS 11.0 as deployment target for compatibility
     // The @available(macOS 26.0, *) checks in Swift handle runtime availability
     // Weak linking for FoundationModels is handled via cargo:rustc-link-arg below
-    let status = Command::new("xcrun")
-        .args([
-            "swiftc",
-            "-target",
-            "arm64-apple-macosx11.0",
-            "-sdk",
-            &sdk_path,
-            "-O",
-            "-import-objc-header",
-            BRIDGE_HEADER,
-            "-c",
-            source_file,
-            "-o",
-            object_path
+    let mut swiftc_args: Vec<String> = vec![
+        "swiftc".to_string(),
+        "-target".to_string(),
+        "arm64-apple-macosx11.0".to_string(),
+        "-sdk".to_string(),
+        sdk_path.clone(),
+        "-O".to_string(),
+        "-import-objc-header".to_string(),
+        BRIDGE_HEADER.to_string(),
+    ];
+
+    // Pass the toolchain plugin directory so Swift macros (e.g. @Generable from
+    // FoundationModelsMacros) can be found when swiftc is invoked directly.
+    if toolchain_plugin_dir.exists() {
+        swiftc_args.push("-plugin-path".to_string());
+        swiftc_args.push(
+            toolchain_plugin_dir
                 .to_str()
-                .expect("Failed to convert object path to string"),
-        ])
+                .expect("Plugin dir path is not valid UTF-8")
+                .to_string(),
+        );
+    }
+
+    swiftc_args.extend([
+        "-c".to_string(),
+        source_file.to_string(),
+        "-o".to_string(),
+        object_path
+            .to_str()
+            .expect("Failed to convert object path to string")
+            .to_string(),
+    ]);
+
+    let status = Command::new("xcrun")
+        .args(&swiftc_args)
         .status()
         .expect("Failed to invoke swiftc for Apple Intelligence bridge");
 

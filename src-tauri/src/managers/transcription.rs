@@ -727,6 +727,29 @@ impl TranscriptionManager {
             translation_note
         );
 
+        // Strip trailing period produced by the model (e.g. Whisper always ends with one)
+        let filtered_result = if settings.strip_trailing_period {
+            filtered_result
+                .strip_suffix('.')
+                .unwrap_or(&filtered_result)
+                .to_string()
+        } else {
+            filtered_result
+        };
+
+        // Lowercase the first character to suppress model auto-capitalisation
+        let filtered_result = if settings.no_auto_capitalize {
+            let mut chars = filtered_result.chars();
+            match chars.next() {
+                None => filtered_result,
+                Some(first) => {
+                    first.to_lowercase().collect::<String>() + chars.as_str()
+                }
+            }
+        } else {
+            filtered_result
+        };
+
         let final_result = filtered_result;
 
         if final_result.is_empty() {

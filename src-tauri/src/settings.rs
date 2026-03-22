@@ -93,6 +93,12 @@ pub struct LLMPrompt {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
+pub struct SpokenSymbolMapping {
+    pub spoken: String,
+    pub symbol: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct PostProcessProvider {
     pub id: String,
     pub label: String,
@@ -399,6 +405,14 @@ pub struct AppSettings {
     pub ort_accelerator: OrtAcceleratorSetting,
     #[serde(default)]
     pub extra_recording_buffer_ms: u64,
+    #[serde(default)]
+    pub spoken_symbols_enabled: bool,
+    #[serde(default = "default_spoken_symbols")]
+    pub spoken_symbols: Vec<SpokenSymbolMapping>,
+    #[serde(default)]
+    pub strip_trailing_period: bool,
+    #[serde(default)]
+    pub no_auto_capitalize: bool,
 }
 
 fn default_model() -> String {
@@ -609,6 +623,75 @@ fn default_typing_tool() -> TypingTool {
     TypingTool::Auto
 }
 
+fn default_spoken_symbols() -> Vec<SpokenSymbolMapping> {
+    vec![
+        SpokenSymbolMapping {
+            spoken: "open brace".to_string(),
+            symbol: "{".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "close brace".to_string(),
+            symbol: "}".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "open bracket".to_string(),
+            symbol: "[".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "close bracket".to_string(),
+            symbol: "]".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "open paren".to_string(),
+            symbol: "(".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "close paren".to_string(),
+            symbol: ")".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "underscore".to_string(),
+            symbol: "_".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "forward slash".to_string(),
+            symbol: "/".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "backslash".to_string(),
+            symbol: "\\".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "pipe".to_string(),
+            symbol: "|".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "ampersand".to_string(),
+            symbol: "&".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "asterisk".to_string(),
+            symbol: "*".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "tilde".to_string(),
+            symbol: "~".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "backtick".to_string(),
+            symbol: "`".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "caret".to_string(),
+            symbol: "^".to_string(),
+        },
+        SpokenSymbolMapping {
+            spoken: "space".to_string(),
+            symbol: " ".to_string(),
+        },
+    ]
+}
+
 fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
     let mut changed = false;
     for provider in default_post_process_providers() {
@@ -718,6 +801,16 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: "escape".to_string(),
         },
     );
+    bindings.insert(
+        "transcribe_with_symbols".to_string(),
+        ShortcutBinding {
+            id: "transcribe_with_symbols".to_string(),
+            name: "Transcribe with Symbol Replacement".to_string(),
+            description: "Converts your speech into text and replaces spoken symbol words with their characters.".to_string(),
+            default_binding: "".to_string(),
+            current_binding: "".to_string(),
+        },
+    );
 
     AppSettings {
         bindings,
@@ -768,6 +861,10 @@ pub fn get_default_settings() -> AppSettings {
         whisper_accelerator: WhisperAcceleratorSetting::default(),
         ort_accelerator: OrtAcceleratorSetting::default(),
         extra_recording_buffer_ms: 0,
+        spoken_symbols_enabled: false,
+        spoken_symbols: default_spoken_symbols(),
+        strip_trailing_period: false,
+        no_auto_capitalize: false,
     }
 }
 

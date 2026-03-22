@@ -1,7 +1,7 @@
 #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
 use crate::apple_intelligence;
 use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, SoundType};
-use crate::audio_toolkit::is_microphone_access_denied;
+use crate::audio_toolkit::{apply_spoken_symbols, is_microphone_access_denied};
 use crate::managers::audio::AudioRecordingManager;
 use crate::managers::history::HistoryManager;
 use crate::managers::transcription::TranscriptionManager;
@@ -47,6 +47,7 @@ pub trait ShortcutAction: Send + Sync {
 // Transcribe Action
 struct TranscribeAction {
     post_process: bool,
+    symbol_replace: bool,
 }
 
 /// Field name for structured output JSON schema
@@ -432,6 +433,7 @@ impl ShortcutAction for TranscribeAction {
 
         let binding_id = binding_id.to_string(); // Clone binding_id for the async task
         let post_process = self.post_process;
+        let symbol_replace = self.symbol_replace;
 
         tauri::async_runtime::spawn(async move {
             let _guard = FinishGuard(ah.clone());
@@ -469,6 +471,19 @@ impl ShortcutAction for TranscribeAction {
                                 maybe_convert_chinese_variant(&settings, &transcription).await
                             {
                                 final_text = converted_text;
+                            }
+
+                            // Apply spoken symbol replacement if requested or always-on
+                            if symbol_replace || settings.spoken_symbols_enabled {
+                                let replaced =
+                                    apply_spoken_symbols(&final_text, &settings.spoken_symbols);
+                                if replaced != final_text {
+                                    debug!(
+                                        "Spoken symbol replacement applied. Before: '{}', After: '{}'",
+                                        final_text, replaced
+                                    );
+                                    final_text = replaced;
+                                }
                             }
 
                             // Then apply LLM post-processing if this is the post-process hotkey
@@ -605,11 +620,22 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
         "transcribe".to_string(),
         Arc::new(TranscribeAction {
             post_process: false,
+            symbol_replace: false,
         }) as Arc<dyn ShortcutAction>,
     );
     map.insert(
         "transcribe_with_post_process".to_string(),
-        Arc::new(TranscribeAction { post_process: true }) as Arc<dyn ShortcutAction>,
+        Arc::new(TranscribeAction {
+            post_process: true,
+            symbol_replace: false,
+        }) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "transcribe_with_symbols".to_string(),
+        Arc::new(TranscribeAction {
+            post_process: false,
+            symbol_replace: true,
+        }) as Arc<dyn ShortcutAction>,
     );
     map.insert(
         "cancel".to_string(),

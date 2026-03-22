@@ -1,3 +1,4 @@
+use crate::settings::SpokenSymbolMapping;
 use natural::phonetics::soundex;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -318,6 +319,41 @@ pub fn filter_transcription_output(
 
     // Trim leading/trailing whitespace
     filtered.trim().to_string()
+}
+
+/// Replaces spoken symbol words/phrases with their corresponding special characters.
+///
+/// Mappings are applied longest-phrase-first to avoid partial matches. Matching is
+/// case-insensitive and respects word boundaries (e.g. "open brace" → "{").
+///
+/// # Arguments
+/// * `text` - The transcribed text to process
+/// * `mappings` - List of (spoken phrase → symbol) substitutions
+///
+/// # Returns
+/// The text with spoken symbol phrases replaced by their symbol characters
+pub fn apply_spoken_symbols(text: &str, mappings: &[SpokenSymbolMapping]) -> String {
+    if mappings.is_empty() {
+        return text.to_string();
+    }
+
+    // Sort by spoken phrase length descending so longer phrases match first
+    let mut sorted: Vec<&SpokenSymbolMapping> = mappings.iter().collect();
+    sorted.sort_by(|a, b| b.spoken.len().cmp(&a.spoken.len()));
+
+    let mut result = text.to_string();
+    for mapping in sorted {
+        if mapping.spoken.is_empty() {
+            continue;
+        }
+        let escaped = regex::escape(&mapping.spoken);
+        if let Ok(re) = Regex::new(&format!(r"(?i)\b{}\b", escaped)) {
+            result = re
+                .replace_all(&result, mapping.symbol.as_str())
+                .to_string();
+        }
+    }
+    result
 }
 
 #[cfg(test)]
