@@ -13,18 +13,21 @@ export const SpokenSymbols: React.FC = () => {
   const { getSetting, updateSetting, isUpdating } = useSettings();
   const [newSpoken, setNewSpoken] = useState("");
   const [newSymbol, setNewSymbol] = useState("");
+  const [newIsRegex, setNewIsRegex] = useState(false);
 
   const enabled = getSetting("spoken_symbols_enabled") ?? false;
   const mappings: SpokenSymbolMapping[] = getSetting("spoken_symbols") ?? [];
 
   const handleAddRow = () => {
-    const spoken = newSpoken.trim().toLowerCase();
+    const isRegex = newIsRegex;
+    const spoken = isRegex ? newSpoken.trim() : newSpoken.trim().toLowerCase();
     const symbol = newSymbol; // do not trim — the symbol may itself be whitespace
     if (!spoken || symbol.length === 0) return;
-    if (mappings.some((m) => m.spoken.toLowerCase() === spoken)) return;
-    updateSetting("spoken_symbols", [...mappings, { spoken, symbol }]);
+    if (mappings.some((m) => m.spoken === spoken && m.is_regex === isRegex)) return;
+    updateSetting("spoken_symbols", [...mappings, { spoken, symbol, is_regex: isRegex }]);
     setNewSpoken("");
     setNewSymbol("");
+    setNewIsRegex(false);
   };
 
   const handleDelete = (index: number) => {
@@ -68,6 +71,9 @@ export const SpokenSymbols: React.FC = () => {
               <th className="px-3 py-2 text-left font-medium text-mid-gray">
                 {t("settings.postProcessing.symbols.table.spokenPhrase")}
               </th>
+              <th className="px-3 py-2 text-center font-medium text-mid-gray w-16">
+                {t("settings.postProcessing.symbols.table.regex")}
+              </th>
               <th className="px-3 py-2 text-left font-medium text-mid-gray w-24">
                 {t("settings.postProcessing.symbols.table.symbol")}
               </th>
@@ -78,7 +84,7 @@ export const SpokenSymbols: React.FC = () => {
             {mappings.length === 0 && (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   className="px-3 py-4 text-center text-mid-gray/60 text-xs"
                 >
                   {t("settings.postProcessing.symbols.table.empty")}
@@ -92,6 +98,13 @@ export const SpokenSymbols: React.FC = () => {
               >
                 <td className="px-3 py-2 font-mono text-xs">
                   {mapping.spoken}
+                </td>
+                <td className="px-3 py-2 text-center w-16">
+                  {mapping.is_regex && (
+                    <span className="inline-block px-1 py-0.5 rounded text-[10px] font-mono font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20">
+                      .*
+                    </span>
+                  )}
                 </td>
                 <td className="px-3 py-2 font-mono text-xs w-24">
                   {mapping.symbol}
@@ -119,13 +132,30 @@ export const SpokenSymbols: React.FC = () => {
                   value={newSpoken}
                   onChange={(e) => setNewSpoken(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={t(
-                    "settings.postProcessing.symbols.table.spokenPlaceholder",
-                  )}
+                  placeholder={
+                    newIsRegex
+                      ? t("settings.postProcessing.symbols.table.spokenRegexPlaceholder")
+                      : t("settings.postProcessing.symbols.table.spokenPlaceholder")
+                  }
                   variant="compact"
                   disabled={isSaving}
                   className="w-full"
                 />
+              </td>
+              <td className="px-2 py-2 text-center w-16">
+                <button
+                  type="button"
+                  onClick={() => setNewIsRegex((v) => !v)}
+                  disabled={isSaving}
+                  title={t("settings.postProcessing.symbols.table.regexToggleTitle")}
+                  className={`inline-block px-1 py-0.5 rounded text-[10px] font-mono font-medium border transition-colors ${
+                    newIsRegex
+                      ? "bg-blue-500/15 text-blue-400 border-blue-500/20"
+                      : "bg-mid-gray/10 text-mid-gray/40 border-mid-gray/20 hover:text-mid-gray/70"
+                  }`}
+                >
+                  .*
+                </button>
               </td>
               <td className="px-2 py-2 w-24">
                 <Input

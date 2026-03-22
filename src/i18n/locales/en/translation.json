@@ -428,9 +428,12 @@
         "enabledDescription": "Automatically replace spoken symbol words with their characters on every transcription.",
         "table": {
           "spokenPhrase": "Spoken Phrase",
+          "regex": "Regex",
           "symbol": "Symbol",
           "spokenPlaceholder": "e.g. open brace",
+          "spokenRegexPlaceholder": "e.g. \\s*underscore\\s*",
           "symbolPlaceholder": "e.g. {",
+          "regexToggleTitle": "Toggle regex mode — use a regular expression as the match pattern",
           "add": "Add",
           "empty": "No symbol mappings. Add one below.",
           "delete": "Remove"

@@ -96,6 +96,8 @@ pub struct LLMPrompt {
 pub struct SpokenSymbolMapping {
     pub spoken: String,
     pub symbol: String,
+    #[serde(default)]
+    pub is_regex: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
@@ -624,71 +626,30 @@ fn default_typing_tool() -> TypingTool {
 }
 
 fn default_spoken_symbols() -> Vec<SpokenSymbolMapping> {
+    fn s(spoken: &str, symbol: &str) -> SpokenSymbolMapping {
+        SpokenSymbolMapping {
+            spoken: spoken.to_string(),
+            symbol: symbol.to_string(),
+            is_regex: false,
+        }
+    }
     vec![
-        SpokenSymbolMapping {
-            spoken: "open brace".to_string(),
-            symbol: "{".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "close brace".to_string(),
-            symbol: "}".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "open bracket".to_string(),
-            symbol: "[".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "close bracket".to_string(),
-            symbol: "]".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "open paren".to_string(),
-            symbol: "(".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "close paren".to_string(),
-            symbol: ")".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "underscore".to_string(),
-            symbol: "_".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "forward slash".to_string(),
-            symbol: "/".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "backslash".to_string(),
-            symbol: "\\".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "pipe".to_string(),
-            symbol: "|".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "ampersand".to_string(),
-            symbol: "&".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "asterisk".to_string(),
-            symbol: "*".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "tilde".to_string(),
-            symbol: "~".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "backtick".to_string(),
-            symbol: "`".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "caret".to_string(),
-            symbol: "^".to_string(),
-        },
-        SpokenSymbolMapping {
-            spoken: "space".to_string(),
-            symbol: " ".to_string(),
-        },
+        s("open brace", "{"),
+        s("close brace", "}"),
+        s("open bracket", "["),
+        s("close bracket", "]"),
+        s("open paren", "("),
+        s("close paren", ")"),
+        s("underscore", "_"),
+        s("forward slash", "/"),
+        s("backslash", "\\"),
+        s("pipe", "|"),
+        s("ampersand", "&"),
+        s("asterisk", "*"),
+        s("tilde", "~"),
+        s("backtick", "`"),
+        s("caret", "^"),
+        s("space", " "),
     ]
 }
 

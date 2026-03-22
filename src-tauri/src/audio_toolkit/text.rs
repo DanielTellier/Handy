@@ -346,8 +346,12 @@ pub fn apply_spoken_symbols(text: &str, mappings: &[SpokenSymbolMapping]) -> Str
         if mapping.spoken.is_empty() {
             continue;
         }
-        let escaped = regex::escape(&mapping.spoken);
-        if let Ok(re) = Regex::new(&format!(r"(?i)\b{}\b", escaped)) {
+        let pattern = if mapping.is_regex {
+            mapping.spoken.clone()
+        } else {
+            format!(r"(?i)\b{}\b", regex::escape(&mapping.spoken))
+        };
+        if let Ok(re) = Regex::new(&pattern) {
             result = re
                 .replace_all(&result, mapping.symbol.as_str())
                 .to_string();
@@ -578,6 +582,28 @@ mod tests {
         let custom_words = vec!["MacBook Pro".to_string()];
         let result = apply_custom_words(text, &custom_words, 0.5);
         assert!(result.contains("MacBook"));
+    }
+
+    #[test]
+    fn test_apply_spoken_symbols_regex_mode() {
+        let mappings = vec![SpokenSymbolMapping {
+            spoken: r"\s*underscore\s*".to_string(),
+            symbol: "_".to_string(),
+            is_regex: true,
+        }];
+        let result = apply_spoken_symbols("variable underscore name", &mappings);
+        assert_eq!(result, "variable_name");
+    }
+
+    #[test]
+    fn test_apply_spoken_symbols_non_regex_unchanged() {
+        let mappings = vec![SpokenSymbolMapping {
+            spoken: "open brace".to_string(),
+            symbol: "{".to_string(),
+            is_regex: false,
+        }];
+        let result = apply_spoken_symbols("type open brace end", &mappings);
+        assert_eq!(result, "type { end");
     }
 
     #[test]
