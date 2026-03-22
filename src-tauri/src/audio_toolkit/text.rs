@@ -607,6 +607,17 @@ mod tests {
     }
 
     #[test]
+    fn test_apply_spoken_symbols_empty_symbol() {
+        let mappings = vec![SpokenSymbolMapping {
+            spoken: r"\s*blank\s*".to_string(),
+            symbol: "".to_string(),
+            is_regex: true,
+        }];
+        let result = apply_spoken_symbols("say blank here", &mappings);
+        assert_eq!(result, "sayhere");
+    }
+
+    #[test]
     fn test_apply_custom_words_trailing_number_not_doubled() {
         // Verify that trailing non-alpha chars (like numbers) aren't double-counted
         // between build_ngram stripping them and extract_punctuation capturing them

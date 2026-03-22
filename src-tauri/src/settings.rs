@@ -626,11 +626,11 @@ fn default_typing_tool() -> TypingTool {
 }
 
 fn default_spoken_symbols() -> Vec<SpokenSymbolMapping> {
-    fn s(spoken: &str, symbol: &str) -> SpokenSymbolMapping {
+    fn s(phrase: &str, symbol: &str) -> SpokenSymbolMapping {
         SpokenSymbolMapping {
-            spoken: spoken.to_string(),
+            spoken: format!(r"\s*{}\s*", phrase),
             symbol: symbol.to_string(),
-            is_regex: false,
+            is_regex: true,
         }
     }
     vec![
@@ -708,6 +708,7 @@ fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
 
     changed
 }
+
 
 pub const SETTINGS_STORE_PATH: &str = "settings_store.json";
 

@@ -22,7 +22,7 @@ export const SpokenSymbols: React.FC = () => {
     const isRegex = newIsRegex;
     const spoken = isRegex ? newSpoken.trim() : newSpoken.trim().toLowerCase();
     const symbol = newSymbol; // do not trim — the symbol may itself be whitespace
-    if (!spoken || symbol.length === 0) return;
+    if (!spoken) return;
     if (mappings.some((m) => m.spoken === spoken && m.is_regex === isRegex)) return;
     updateSetting("spoken_symbols", [...mappings, { spoken, symbol, is_regex: isRegex }]);
     setNewSpoken("");
@@ -176,7 +176,7 @@ export const SpokenSymbols: React.FC = () => {
                   onClick={handleAddRow}
                   variant="primary"
                   size="sm"
-                  disabled={!newSpoken.trim() || newSymbol.length === 0 || isSaving}
+                  disabled={!newSpoken.trim() || isSaving}
                 >
                   {t("settings.postProcessing.symbols.table.add")}
                 </Button>
