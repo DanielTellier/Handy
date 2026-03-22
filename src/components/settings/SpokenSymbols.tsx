@@ -30,6 +30,16 @@ export const SpokenSymbols: React.FC = () => {
     setNewIsRegex(false);
   };
 
+  const handleUpdateMapping = (
+    index: number,
+    patch: Partial<SpokenSymbolMapping>,
+  ) => {
+    updateSetting(
+      "spoken_symbols",
+      mappings.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+    );
+  };
+
   const handleDelete = (index: number) => {
     updateSetting(
       "spoken_symbols",
@@ -94,20 +104,48 @@ export const SpokenSymbols: React.FC = () => {
             {mappings.map((mapping, index) => (
               <tr
                 key={index}
-                className="border-b border-mid-gray/10 last:border-0 hover:bg-mid-gray/5"
+                className="border-b border-mid-gray/10 last:border-0"
               >
-                <td className="px-3 py-2 font-mono text-xs">
-                  {mapping.spoken}
+                <td className="px-2 py-2">
+                  <Input
+                    type="text"
+                    defaultValue={mapping.spoken}
+                    onBlur={(e) =>
+                      handleUpdateMapping(index, { spoken: e.target.value })
+                    }
+                    variant="compact"
+                    disabled={isSaving}
+                    className="w-full font-mono"
+                  />
                 </td>
-                <td className="px-3 py-2 text-center w-16">
-                  {mapping.is_regex && (
-                    <span className="inline-block px-1 py-0.5 rounded text-[10px] font-mono font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                      .*
-                    </span>
-                  )}
+                <td className="px-2 py-2 text-center w-16">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdateMapping(index, { is_regex: !mapping.is_regex })
+                    }
+                    disabled={isSaving}
+                    title={t("settings.postProcessing.symbols.table.regexToggleTitle")}
+                    className={`inline-block px-1 py-0.5 rounded text-[10px] font-mono font-medium border transition-colors ${
+                      mapping.is_regex
+                        ? "bg-blue-500/15 text-blue-400 border-blue-500/20"
+                        : "bg-mid-gray/10 text-mid-gray/40 border-mid-gray/20 hover:text-mid-gray/70"
+                    }`}
+                  >
+                    .*
+                  </button>
                 </td>
-                <td className="px-3 py-2 font-mono text-xs w-24">
-                  {mapping.symbol}
+                <td className="px-2 py-2 w-24">
+                  <Input
+                    type="text"
+                    defaultValue={mapping.symbol}
+                    onBlur={(e) =>
+                      handleUpdateMapping(index, { symbol: e.target.value })
+                    }
+                    variant="compact"
+                    disabled={isSaving}
+                    className="w-full font-mono"
+                  />
                 </td>
                 <td className="px-2 py-1 text-right w-10">
                   <button
